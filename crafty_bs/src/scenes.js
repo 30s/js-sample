@@ -23,8 +23,8 @@ Crafty.scene('Game', function() {
                 Crafty.e('Tree').at(x, y);
                 this.occupied[x][y] = true;
             } else if (Math.random() < 0.06 && !this.occupied[x][y]) {
-                // Place a bush entity at the current tile
-                Crafty.e('Bush').at(x, y);
+                var bush_or_rock = (Math.random() > 0.3) ? 'Bush' : 'Rock';
+                Crafty.e(bush_or_rock).at(x, y);
                 this.occupied[x][y] = true;
             }
         }
@@ -41,6 +41,8 @@ Crafty.scene('Game', function() {
             }
         }
     }
+
+    Crafty.audio.play('ring');
     
     this.show_victory = this.bind('VillageVisited', function() {
         if (!Crafty('Village').length) {
@@ -55,9 +57,15 @@ Crafty.scene('Victory', function() {
     Crafty.e('2D, DOM, Text')
         .attr({ x: 0, y: 0 })
         .text('Victory!');
-    
-    this.restart_game = this.bind('KeyDown', function() {
-        Crafty.scene('Game');
+
+    Crafty.audio.play('applause');
+
+    var delay = true;
+    setTimeout(function() { delay = false; }, 5000);
+    this.restart_game = Crafty.bind('KeyDown', function() {
+        if (!delay) {
+            Crafty.scene('Game');
+        }
     });
 }, function() {
     this.unbind('KeyDown', this.restart_game);
@@ -75,38 +83,52 @@ Crafty.scene('Loading', function(){
         .css($text_css);
     
     // Load our sprite map image
-    Crafty.load(['assets/16x16_forest_1.gif', 
+    Crafty.load(['assets/16x16_forest_2.gif', 
                  'assets/hunter.png',
                  'assets/door_knock_3x.mp3',
                  'assets/door_knock_3x.ogg',
-                 'assets/door_knock_3x.aac'], function(){
-                     // Once the image is loaded...
-                     
-                     // Define the individual sprites in the image
-                     // Each one (spr_tree, etc.) becomes a component
-                     // These components' names are prefixed with "spr_"
-                     // to remind us that they simply cause the entity
-                     // to be drawn with a certain sprite
-                     Crafty.sprite(16, 'assets/16x16_forest_1.gif', {
-                         spr_tree: [0, 0],
-                         spr_bush: [1, 0],
-                         spr_village: [0, 1],
-                     });
+                 'assets/door_knock_3x.aac',
+                 'assets/board_room_applause.mp3',
+                 'assets/board_room_applause.ogg',
+                 'assets/board_room_applause.aac',
+                 'assets/candy_dish_lid.mp3',
+                 'assets/candy_dish_lid.ogg',
+                 'assets/candy_dish_lid.aac'
+                ], function(){
+                    // Once the image is loaded...
+                    
+                    // Define the individual sprites in the image
+                    // Each one (spr_tree, etc.) becomes a component
+                    // These components' names are prefixed with "spr_"
+                    // to remind us that they simply cause the entity
+                    // to be drawn with a certain sprite
+                    Crafty.sprite(16, 'assets/16x16_forest_2.gif', {
+                        spr_tree: [0, 0],
+                        spr_bush: [1, 0],
+                        spr_village: [0, 1],
+                        spr_rock: [1, 1]
+                    });
 
-                     // Define the PC's sprite to be the first sprite in the third row of the
-                     // animation sprite map
-                     Crafty.sprite(16, 'assets/hunter.png', {
-                         spr_player: [0, 2],
-                     }, 0, 2);
+                    // Define the PC's sprite to be the first sprite in the third row of the
+                    // animation sprite map
+                    Crafty.sprite(16, 'assets/hunter.png', {
+                        spr_player: [0, 2],
+                    }, 0, 2);
 
-                     // Define our sounds for later use
-                     Crafty.audio.add({
-                         knock: ['assets/door_knock_3x.mp3',
-                                 'assets/door_knock_3x.ogg',
-                                 'assets/door_knock_3x.aac']
-                     });
-                     
-                     // Now that our sprites are ready to draw, start the game
-                     Crafty.scene('Game');
-                 })
+                    // Define our sounds for later use
+                    Crafty.audio.add({
+                        knock: ['assets/door_knock_3x.mp3',
+                                'assets/door_knock_3x.ogg',
+                                'assets/door_knock_3x.aac'],
+                        applause: ['assets/board_room_applause.mp3',
+                                   'assets/board_room_applause.ogg',
+                                   'assets/board_room_applause.aac'],
+                        ring: ['assets/candy_dish_lid.mp3',
+                               'assets/candy_dish_lid.ogg',
+                               'assets/candy_dish_lid.aac']
+                    });
+                    
+                    // Now that our sprites are ready to draw, start the game
+                    Crafty.scene('Game');
+                })
 });
