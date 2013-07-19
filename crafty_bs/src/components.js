@@ -111,6 +111,7 @@ Crafty.c('Village', {
     
     collect: function() {
         this.destroy();
+        Crafty.audio.play('knock');
         Crafty.trigger('VillageVisited', this);
     }
 });
